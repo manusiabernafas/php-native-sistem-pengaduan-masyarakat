@@ -1,0 +1,60 @@
+Sistem Pengaduan Masyarakat (e-Lapor) berbasis PHP Native dan MySQL untuk pemerintah kota/kabupaten, desa, kelurahan, kampus, atau instansi layanan publik. Warga cukup membuka portal, menulis laporan (boleh anonim) beserta lokasi dan foto, lalu mendapat nomor tiket untuk melacak perkembangan laporannya sampai selesai, lengkap dengan penilaian kepuasan di akhir.
+
+Di sisi petugas, setiap aduan diverifikasi admin, diteruskan otomatis ke dinas/unit penanggung jawab sesuai kategori, lalu ditindaklanjuti dengan riwayat tanggapan yang rapi. Sistem menghitung umur aduan terhadap target SLA per kategori dan menandai yang terlambat. Tersedia juga halaman transparansi publik berisi statistik penanganan. Tampilannya dark dashboard modern, cocok dipakai langsung atau untuk tugas kuliah dan skripsi sistem informasi layanan publik.
+Cara kerja
+Portal warga (tanpa login) berisi formulir laporan dengan kategori, lokasi, isi, dan foto (divalidasi tipe MIME dan ukurannya). Perlindungan spam memakai honeypot dan pembatasan 5 laporan per sesi per jam. Setiap laporan mendapat kode tiket unik (format ADU-YYMM-0001) dan otomatis diarahkan ke unit penanggung jawab sesuai kategori. Warga melacak tiket untuk melihat timeline penanganan, lalu memberi nilai 1 sampai 5 setelah aduan selesai.
+
+Admin memverifikasi atau menolak aduan, mengatur prioritas, dan bisa meneruskannya ke unit lain. Petugas unit hanya melihat dan menindaklanjuti aduan milik unitnya (dicek di server, bukan sekadar disembunyikan di tampilan). Setiap tindak lanjut tercatat di timeline, dan catatan internal hanya terlihat oleh petugas. Status bergerak dari Baru, Diverifikasi, Diproses, hingga Selesai atau Ditolak, dengan waktu selesai tercatat otomatis. Umur aduan dibandingkan dengan SLA per kategori (misalnya Sampah 3 hari, Jalan Rusak 14 hari). Laporan kinerja menampilkan per unit dan per kategori: jumlah masuk, selesai, ditolak, rata-rata hari penyelesaian, persentase tepat SLA, dan rata-rata kepuasan, serta bisa diekspor ke CSV.
+Fitur
+Portal warga tanpa login: buat laporan dengan kategori, lokasi, isi, dan foto
+Opsi laporan anonim (identitas pelapor tidak ditampilkan ke petugas)
+Nomor tiket otomatis (ADU-YYMM-0001) untuk melacak laporan
+Halaman lacak tiket dengan timeline penanganan yang bisa dilihat publik
+Penilaian kepuasan pelapor (1 sampai 5) setelah aduan selesai
+Halaman transparansi publik: jumlah aduan, persentase selesai, rata-rata waktu, kepuasan
+Routing otomatis ke unit/dinas penanggung jawab sesuai kategori
+Alur status: Baru, Diverifikasi, Diproses, Selesai, Ditolak
+Target SLA per kategori dan penanda aduan yang lewat SLA
+Prioritas aduan (rendah, sedang, tinggi) dan pengurutan otomatis
+Catatan internal petugas yang tidak terlihat oleh pelapor
+Petugas hanya bisa mengakses aduan unitnya (dicek di server)
+Tombol hubungi pelapor via WhatsApp
+Dashboard: aduan baru, dalam proses, selesai bulan ini, rata-rata penyelesaian, kepuasan
+Grafik masuk vs selesai 8 minggu dan kategori terbanyak
+Laporan kinerja per unit (persentase tepat SLA) dan per kategori, ekspor CSV
+Anti spam: honeypot dan batas 5 laporan per jam, validasi MIME foto
+Foto disimpan di folder terlindungi dan disajikan lewat skrip
+Data master: kategori, SLA, unit, pengguna, identitas layanan
+Data contoh 6 bulan (280+ aduan) dan tampilan dark dashboard yang responsif
+Panduan instalasi
+Kebutuhan: PHP 8.0+ (ekstensi fileinfo dan gd aktif, bawaan XAMPP) dan MySQL/MariaDB.
+
+Ekstrak ZIP, lalu pindahkan folder pengaduan ke:
+
+XAMPP: C:\xampp\htdocs\pengaduan
+Laragon: C:\laragon\www\pengaduan
+Jalankan Apache dan MySQL.
+
+Buka http://localhost/phpmyadmin → Import → pilih database/pengaduan_masyarakat.sql → Import.
+
+Atau lewat terminal:
+
+mysql -u root -p < database/pengaduan_masyarakat.sql
+Sesuaikan config/database.php jika user/password MySQL kamu berbeda:
+
+return [
+    'host'     => 'localhost',
+    'port'     => 3306,
+    'database' => 'pengaduan_masyarakat',
+    'username' => 'root',
+    'password' => '',
+];
+Portal warga: http://localhost/pengaduan
+
+Panel petugas: http://localhost/pengaduan/index.php?page=login (password semua akun: admin123)
+
+admin: verifikasi, teruskan ke unit, data master
+dpu, dlh, dishub: petugas unit, hanya melihat aduan unitnya
+Buka Master untuk mengganti nama layanan, instansi, kategori, unit, dan target SLA.
+
+Catatan: folder uploads/ dilindungi .htaccess (Apache). Untuk Nginx tambahkan aturan deny all pada folder tersebut.
